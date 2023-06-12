@@ -15,12 +15,12 @@ position: fixed;
 
 export const ModalWin = styled.div`
 position: relative;
-top: 50%;
+top: 60%;
 left: 50%;
 transform: translate(-50%, -50%);
 border-radius: 15px;
 
-width: 900px;
+width: 500px;
 height: auto;
 
 background-color: #f0f0f0;
