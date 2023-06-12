@@ -1,12 +1,12 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import { Vortex } from 'react-loader-spinner';
 
 import { Wrapper, LoaderItem } from './Loader.styled';
 
 
-export class Loader extends Component {
-  render() {
+export const Loader = () => {
+  
     return (
       <Wrapper>
       
@@ -24,4 +24,4 @@ export class Loader extends Component {
       </Wrapper>
     );
   }
-}
+
