@@ -11,6 +11,7 @@ import {Modal} from 'components/Modal';
 
 
 
+
 export const App = () => {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState(1);
@@ -24,10 +25,14 @@ export const App = () => {
   const [currentImageDescription, setCurrentImageDescription] = useState(null);
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchData = async () => {
+      if (query === '') return;
+
       setIsLoading(true);
+
       try {
-        const { hits, totalHits } = await getImg(query);
+        const { hits, totalHits } = await getImg(query, page);
+
         const imagesArray = hits.map(hit => ({
           id: hit.id,
           description: hit.tags,
@@ -35,40 +40,16 @@ export const App = () => {
           largeImage: hit.largeImageURL,
         }));
 
-        setImages(imagesArray);
+        if (page === 1) {
+          setImages(imagesArray);
+        } else {
+          setImages(prevImages => [...prevImages, ...imagesArray]);
+        }
+
         setImagesOnPage(imagesArray.length);
         setTotalImages(totalHits);
-        setPage(1);
         setError(null);
       } catch (error) {
-        setError(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (query !== '') {
-      fetchImages();
-    }
-  }, [query]);
-
-  useEffect(() => {
-    const fetchMoreImages = async () => {
-      setIsLoading(true);
-      try {
-        const { hits } = await getImg(query, page);
-        const imagesArray = hits.map(hit => ({
-          id: hit.id,
-          description: hit.tags,
-          smallImage: hit.webformatURL,
-          largeImage: hit.largeImageURL,
-        }));
-
-        setImages(prevImages => [...prevImages, ...imagesArray]);
-        setImagesOnPage(prevImagesOnPage => prevImagesOnPage + imagesArray.length);
-        setError(null);
-      } catch (error) {
-        
         console.error('Error fetching images:', error);
         setError('Error fetching images. Please try again.');
       } finally {
@@ -76,17 +57,20 @@ export const App = () => {
       }
     };
 
-    if (page !== 1) {
-      fetchMoreImages();
-    }
+    fetchData();
   }, [query, page]);
 
-  const handleSearch = newQuery => {
-    setQuery(newQuery);
+  const handleSearchRequest = query => {
+    setQuery(query);
+    setPage(1);
   };
 
-  const handleNextPage = () => {
+  const handleNextFetch = () => {
     setPage(prevPage => prevPage + 1);
+  };
+
+  const handleToggleModal = () => {
+    setShowModal(prevShowModal => !prevShowModal);
   };
 
   const handleOpenModal = e => {
@@ -100,38 +84,44 @@ export const App = () => {
     }
   };
 
-  const handleToggleModal = () => {
-    setShowModal(prevShowModal => !prevShowModal);
-  };
-
-
   return (
-          <>
-            <Searchbar onSubmit={handleSearch} />
-    
-            {images && <ImageGallery images={images} openModal={handleOpenModal} />}
-    
-            {isLoading && <Loader />}
-    
-            {imagesOnPage >= 12 && imagesOnPage < totalImages && (
-              <Button onNextFetch={handleNextPage} />
-            )}
-    
-            {showModal && (
-              <Modal
-                onClose={handleToggleModal}
-                currentImageUrl={currentImageUrl}
-                currentImageDescription={currentImageDescription}
-              />
-            )}
-            {error && (
-        <div className="error-message">{error}</div>
+    <>
+      <Searchbar onSubmit={handleSearchRequest} />
+
+      {images && <ImageGallery images={images} openModal={handleOpenModal} />}
+
+      {isLoading && <Loader />}
+
+      {imagesOnPage >= 12 && imagesOnPage < totalImages && (
+        <Button onNextFetch={handleNextFetch} />
       )}
-    
-            <ToastContainer autoClose={2000}/>
-          </>
-        );
-}
+
+      {showModal && (
+        <Modal
+          onClose={handleToggleModal}
+          currentImageUrl={currentImageUrl}
+          currentImageDescription={currentImageDescription}
+        />
+      )}
+
+      {error && <div className="error-message">{error}</div>}
+
+      <ToastContainer autoClose={2000} />
+    </>
+  );
+};
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 // export class App extends Component {

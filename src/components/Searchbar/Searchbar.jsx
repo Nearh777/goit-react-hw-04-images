@@ -42,7 +42,7 @@ const onSubmitForm = e => {
         </ButtonSearchForm>
 
         <Input
-          
+          name='value'
           type="text"
           autoComplete="off"
           autoFocus
